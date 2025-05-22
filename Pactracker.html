@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcolatrice Proiezioni PAC Multi-Asset</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Dark blue-gray background */
+            color: #e2e8f0; /* Light gray text */
+        }
+        .card {
+            background-color: #2d3748; /* Slightly lighter card background */
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .card-header .emoji {
+            font-size: 2rem;
+            margin-right: 0.75rem;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: #a0aec0; /* Medium gray label text */
+        }
+        .input-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid #4a5568; /* Darker border for inputs */
+            background-color: #1a202c; /* Input background same as body */
+            color: #e2e8f0;
+            transition: border-color 0.3s ease;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #63b3ed; /* Blue border on focus */
+            box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.3);
+        }
+        .btn-calculate {
+            background-color: #48bb78; /* Green button */
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border: none;
+            width: 100%;
+            font-size: 1.125rem;
+        }
+        .btn-calculate:hover {
+            background-color: #38a169; /* Darker green on hover */
+        }
+        .results-card {
+            background-color: #2d3748;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        .results-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #4a5568;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-item span:first-child {
+            color: #a0aec0;
+        }
+        .result-item span:last-child {
+            font-weight: 500;
+        }
+        .total-results-card {
+            border-top: 4px solid #48bb78; /* Green top border for total */
+        }
+
+        /* Category specific colors */
+        .robo-advisor .card-header { color: #4fd1c5; } /* Teal */
+        .crypto .card-header { color: #f6ad55; } /* Orange */
+        .forex .card-header { color: #68d391; } /* Green */
+        .argento .card-header { color: #a0aec0; } /* Gray */
+
+        .robo-advisor .result-value { color: #4fd1c5; }
+        .crypto .result-value { color: #f6ad55; }
+        .forex .result-value { color: #68d391; }
+        .argento .result-value { color: #a0aec0; }
+        .total-results-card .result-value { color: #48bb78; }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            font-size: 0.875rem;
+            color: #718096; /* Darker gray for footer */
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <header class="text-center mb-8 md:mb-12">
+        <h1 class="text-3xl md:text-4xl font-bold text-white">🔮 Calcolatrice Proiezioni PAC Multi-Asset</h1>
+        <p class="text-lg text-gray-400 mt-2">Visualizza il potenziale di crescita dei tuoi investimenti.</p>
+    </header>
+
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="card robo-advisor">
+            <div class="card-header">
+                <span class="emoji">🤖</span>
+                <span>Robo Advisor</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="input-group">
+                    <label for="ra-initial">Capitale Iniziale (€)</label>
+                    <input type="number" id="ra-initial" value="1000">
+                </div>
+                <div class="input-group">
+                    <label for="ra-pac">PAC Mensile (€)</label>
+                    <input type="number" id="ra-pac" value="200">
+                </div>
+                <div class="input-group">
+                    <label for="ra-return">Rendimento Annuo Atteso (%)</label>
+                    <input type="number" id="ra-return" value="11.05" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="ra-years">Durata (Anni)</label>
+                    <input type="number" id="ra-years" value="10">
+                </div>
+            </div>
+        </div>
+
+        <div class="card crypto">
+            <div class="card-header">
+                <span class="emoji">₿</span>
+                <span>Criptovalute</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="input-group">
+                    <label for="crypto-initial">Capitale Iniziale (€)</label>
+                    <input type="number" id="crypto-initial" value="500">
+                </div>
+                <div class="input-group">
+                    <label for="crypto-pac">PAC Mensile (€)</label>
+                    <input type="number" id="crypto-pac" value="150">
+                </div>
+                <div class="input-group">
+                    <label for="crypto-return">Rendimento Annuo Atteso (%)</label>
+                    <input type="number" id="crypto-return" value="20" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="crypto-years">Durata (Anni)</label>
+                    <input type="number" id="crypto-years" value="10">
+                </div>
+            </div>
+        </div>
+
+        <div class="card forex">
+            <div class="card-header">
+                <span class="emoji">💹</span>
+                <span>Forex</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="input-group">
+                    <label for="forex-initial">Capitale Iniziale (€)</label>
+                    <input type="number" id="forex-initial" value="2000">
+                </div>
+                <div class="input-group">
+                    <label for="forex-pac">PAC Mensile (€)</label>
+                    <input type="number" id="forex-pac" value="100">
+                </div>
+                <div class="input-group">
+                    <label for="forex-return">Rendimento Annuo Atteso (%)</label>
+                    <input type="number" id="forex-return" value="8" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="forex-years">Durata (Anni)</label>
+                    <input type="number" id="forex-years" value="10">
+                </div>
+            </div>
+        </div>
+
+        <div class="card argento">
+            <div class="card-header">
+                <span class="emoji">🥈</span>
+                <span>Argento</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="input-group">
+                    <label for="argento-initial">Capitale Iniziale (€)</label>
+                    <input type="number" id="argento-initial" value="320">
+                </div>
+                <div class="input-group">
+                    <label for="argento-pac">PAC Mensile (€)</label>
+                    <input type="number" id="argento-pac" value="50">
+                </div>
+                <div class="input-group">
+                    <label for="argento-return">Rendimento Annuo Atteso (%)</label>
+                    <input type="number" id="argento-return" value="7" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="argento-years">Durata (Anni)</label>
+                    <input type="number" id="argento-years" value="10">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-md mx-auto mt-8">
+        <button id="calculate-button" class="btn-calculate">Calcola Proiezioni</button>
+    </div>
+
+    <div id="results-container" class="max-w-6xl mx-auto mt-8 md:mt-12">
+        </div>
+
+    <footer class="footer">
+        <p>&copy; <span id="currentYear"></span> AI-Portafoglio Projections. Tutti i diritti riservati.</p>
+        <p class="mt-1 text-xs">Le proiezioni sono stime basate sui dati inseriti e non costituiscono garanzia di rendimenti futuri.</p>
+    </footer>
+
+    <script>
+        // Imposta l'anno corrente nel footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // Seleziona il pulsante di calcolo
+        const calculateButton = document.getElementById('calculate-button');
+        // Seleziona il container dei risultati
+        const resultsContainer = document.getElementById('results-container');
+
+        // Definisce le categorie di asset con i loro ID e nomi/emoji
+        const assetCategories = [
+            { idPrefix: 'ra', name: 'Robo Advisor', emoji: '🤖', colorClass: 'robo-advisor' },
+            { idPrefix: 'crypto', name: 'Criptovalute', emoji: '₿', colorClass: 'crypto' },
+            { idPrefix: 'forex', name: 'Forex', emoji: '💹', colorClass: 'forex' },
+            { idPrefix: 'argento', name: 'Argento', emoji: '🥈', colorClass: 'argento' }
+        ];
+
+        // Aggiunge un event listener al pulsante di calcolo
+        calculateButton.addEventListener('click', () => {
+            // Pulisce i risultati precedenti
+            resultsContainer.innerHTML = '';
+            let grandTotalFutureValue = 0;
+            let grandTotalInvested = 0;
+            let grandTotalInterest = 0;
+
+            // Itera su ogni categoria di asset per calcolare e visualizzare i risultati
+            assetCategories.forEach(category => {
+                // Ottiene i valori di input per la categoria corrente
+                const initialInvestment = parseFloat(document.getElementById(`${category.idPrefix}-initial`).value) || 0;
+                const monthlyPac = parseFloat(document.getElementById(`${category.idPrefix}-pac`).value) || 0;
+                const annualReturn = parseFloat(document.getElementById(`${category.idPrefix}-return`).value) || 0;
+                const years = parseInt(document.getElementById(`${category.idPrefix}-years`).value) || 0;
+
+                // Validazione base degli input
+                if (annualReturn < 0 || years <= 0) {
+                    // Se i dati non sono validi per una proiezione significativa, mostra un messaggio
+                    const categoryResultCard = createResultCard(category, 0, initialInvestment + (monthlyPac * years * 12), 0, true);
+                    resultsContainer.appendChild(categoryResultCard);
+                    return; // Passa alla prossima categoria
+                }
+                
+                // Calcola il tasso di interesse mensile e il numero di periodi (mesi)
+                const monthlyRate = annualReturn / 100 / 12;
+                const numberOfPeriods = years * 12;
+
+                // Calcola il valore futuro del capitale iniziale
+                // FV = PV * (1 + r)^n
+                let futureValueOfInitial = 0;
+                if (initialInvestment > 0 && monthlyRate > 0) {
+                     futureValueOfInitial = initialInvestment * Math.pow(1 + monthlyRate, numberOfPeriods);
+                } else if (initialInvestment > 0 && monthlyRate === 0) {
+                    futureValueOfInitial = initialInvestment; // Nessuna crescita se il tasso è 0
+                }
+
+
+                // Calcola il valore futuro del PAC (contributi all'inizio del periodo)
+                // FV = P * [((1 + r)^n - 1) / r] * (1 + r)
+                let futureValueOfPac = 0;
+                if (monthlyPac > 0 && monthlyRate > 0) {
+                    futureValueOfPac = monthlyPac * ( (Math.pow(1 + monthlyRate, numberOfPeriods) - 1) / monthlyRate ) * (1 + monthlyRate);
+                } else if (monthlyPac > 0 && monthlyRate === 0) {
+                     futureValueOfPac = monthlyPac * numberOfPeriods; // Somma dei contributi se il tasso è 0
+                }
+
+
+                // Calcola il valore futuro totale per la categoria
+                const totalFutureValue = futureValueOfInitial + futureValueOfPac;
+                // Calcola il totale investito
+                const totalInvested = initialInvestment + (monthlyPac * numberOfPeriods);
+                // Calcola gli interessi totali generati
+                const totalInterest = totalFutureValue - totalInvested;
+
+                // Aggiorna i totali generali
+                grandTotalFutureValue += totalFutureValue;
+                grandTotalInvested += totalInvested;
+                grandTotalInterest += totalInterest;
+
+                // Crea e aggiunge la card dei risultati per la categoria
+                const categoryResultCard = createResultCard(category, totalFutureValue, totalInvested, totalInterest);
+                resultsContainer.appendChild(categoryResultCard);
+            });
+
+            // Crea e aggiunge la card dei risultati totali
+            const totalResultCard = createResultCard(
+                { name: 'Totale Complessivo', emoji: '🎉', colorClass: 'total-results-card' },
+                grandTotalFutureValue,
+                grandTotalInvested,
+                grandTotalInterest
+            );
+            resultsContainer.appendChild(totalResultCard);
+        });
+
+        /**
+         * Crea una card HTML per visualizzare i risultati di una categoria.
+         * @param {object} category - L'oggetto della categoria ({ name, emoji, colorClass }).
+         * @param {number} futureValue - Il valore futuro proiettato.
+         * @param {number} totalInvested - Il totale investito.
+         * @param {number} totalInterest - Gli interessi totali generati.
+         * @param {boolean} isError - Indica se c'è stato un errore nei dati di input.
+         * @returns {HTMLElement} L'elemento div della card dei risultati.
+         */
+        function createResultCard(category, futureValue, totalInvested, totalInterest, isError = false) {
+            const card = document.createElement('div');
+            card.className = `results-card ${category.colorClass} mb-6`;
+
+            let content = `
+                <h3 class="flex items-center text-xl font-semibold mb-3">
+                    <span class="text-2xl mr-2">${category.emoji}</span>
+                    ${category.name}
+                </h3>`;
+
+            if (isError) {
+                content += `<p class="text-red-400">Dati non validi per la proiezione (es. rendimento negativo o durata zero).</p>
+                            <div class="result-item">
+                                <span>Totale Investito Stimato:</span>
+                                <span class="${category.colorClass} result-value">€ ${totalInvested.toFixed(2)}</span>
+                            </div>`;
+            } else {
+                content += `
+                    <div class="result-item">
+                        <span>Valore Futuro Proiettato:</span>
+                        <span class="${category.colorClass} result-value">€ ${futureValue.toFixed(2)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Totale Investito:</span>
+                        <span>€ ${totalInvested.toFixed(2)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Interessi Totali Generati:</span>
+                        <span class="${category.colorClass} result-value">€ ${totalInterest.toFixed(2)}</span>
+                    </div>`;
+            }
+            card.innerHTML = content;
+            return card;
+        }
+    </script>
+</body>
+</html>
+
